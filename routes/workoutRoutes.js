@@ -51,19 +51,21 @@ router.get('/api/workouts', (req, res) =>{
     })
 });
 
-router.post('/reviews', withAuth, async (req, res) => {
-    
-    try {
-        const newReview = await Review.create({
-          ...req.body
+router.get("/api/workouts/range", function (req, res) {
+    Workout.aggregate([
+
+        //find all workouts
+        { $match: {} },
+
+        // duration
+        { $addFields: { totalDuration: { $sum: "$exercises.duration" } } }
+    ])
+        .then(dbWorkout => {
+            res.json(dbWorkout);
+        })
+        .catch(err => {
+            res.status(400).json(err);
         });
-    
-        res.status(200).json(newReview);
-      }
-    catch (err) {
-        // console.log(err)
-        res.status(400).json(err);
-    }
-})
+});
 
 module.exports = router;
